@@ -63,7 +63,6 @@ function OnGameTick(time_ms)
     if crash then
         if shroomy.is_key_pressed("FIRE") then
             if #lives > 0 then
-                lives[#lives] = nil
                 init(false)
             else
                 init(true)
@@ -144,6 +143,7 @@ function OnGameTick(time_ms)
     if scale > 64 then
         plane:set_frame("crash")
         crash = true
+        lives[#lives] = nil
     end
 
     for k, set in pairs(things) do
@@ -180,6 +180,7 @@ function OnGameTick(time_ms)
 
         if plane:is_collided(enemy) then
             plane:set_frame("crash")
+            lives[#lives] = nil
             crash = true
         end
 
