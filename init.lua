@@ -5,6 +5,8 @@ shroomy.set_background_color(0, 64, 0)
 shroomy.set_window_name("Air Fighter")
 shroomy.set_tick(17)
 
+math.randomseed(os.time())
+
 
 shroomy.load_texture("plane-on", "textures/plane-on.png")
 shroomy.load_texture("plane-idle", "textures/plane-idle.png")
@@ -14,6 +16,9 @@ shroomy.load_texture("pond", "textures/pond.png")
 shroomy.load_texture("rock-1", "textures/rock-1.png")
 shroomy.load_texture("bullet", "textures/bullet.png")
 shroomy.load_texture("enemy", "textures/enemy.png")
+
+local GameOver = entity.new({"crash"}, 0, {x = width/2 - 256, y = limit/2 - 256}, {y = 512, x = 512}, {})
+local lives = {}
 
 
 local things
@@ -27,7 +32,7 @@ local scale
 local cooldown
 local speed
 
-function init()
+function init(full)
     cooldown = 0
     scale = 32
     crash = false
@@ -42,16 +47,27 @@ function init()
     bullets = {}
     enemies = {}
 
-    plane = entity.new({}, 0, {x = 240, y = 400}, {y = 64, x = 64}, {x_min = -24, x_max = 24, y_min = -24, y_max = 32})
+    if full then
+        for i = 1, 3 do
+            lives[i] = entity.new({"plane-idle"}, 0, {x = (i-1) * 32, y = limit - 32}, {y = 32, x = 32}, {})
+        end
+    end
+
+    plane = entity.new({}, 0, {x = width/2 - 32, y = limit - 128}, {y = 64, x = 64}, {x_min = -24, x_max = 24, y_min = -24, y_max = 32})
     plane:set_frame("plane-idle")
 end
 
-init()
+init(true)
 
 function OnGameTick(time_ms)
-    if crash then 
+    if crash then
         if shroomy.is_key_pressed("FIRE") then
-            init()
+            if #lives > 0 then
+                lives[#lives] = nil
+                init(false)
+            else
+                init(true)
+            end
         else
             return
         end
@@ -184,19 +200,28 @@ end
 
 
 function RenderLoop()
-    for _, set in ipairs(things) do
-        for _, thing in pairs(set) do
-            thing:render()
+    if #lives > 0 then
+        for _, set in ipairs(things) do
+            for _, thing in pairs(set) do
+                thing:render()
+            end
         end
-    end
 
-    for _, bullet in pairs(bullets) do
-        bullet:render()
-    end
+        for _, bullet in pairs(bullets) do
+            bullet:render()
+        end
 
-    for _, enemy in pairs(enemies) do
-        enemy:render()
-    end
+        for _, enemy in pairs(enemies) do
+            enemy:render()
+        end
 
-    plane:render()
+        plane:render()
+
+        for _, life in pairs(lives) do
+            life:render()
+        end
+
+    else
+        GameOver:render()
+    end
 end
