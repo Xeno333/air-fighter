@@ -61,7 +61,7 @@ init(true)
 
 function OnGameTick(time_ms)
     if crash then
-        if shroomy.is_key_pressed("FIRE") then
+        if shroomy.is_key_pressed("R") then
             if #lives > 0 then
                 init(false)
             else
