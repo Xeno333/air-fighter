@@ -26,7 +26,7 @@ local bullets
 local enemies
 local plane
 local engines
-local progress
+local score
 local crash
 local scale
 local cooldown
@@ -37,7 +37,6 @@ function init(full)
     scale = 32
     crash = false
     engines = false
-    progress = 0
     speed = 1
     things = {
         {},
@@ -51,6 +50,7 @@ function init(full)
         for i = 1, 3 do
             lives[i] = entity.new({"plane-idle"}, 0, {x = (i-1) * 32, y = limit - 32}, {y = 32, x = 32}, {})
         end
+        score = 0
     end
 
     plane = entity.new({}, 0, {x = width/2 - 32, y = limit - 128}, {y = 64, x = 64}, {x_min = -24, x_max = 24, y_min = -24, y_max = 32})
@@ -101,9 +101,6 @@ function OnGameTick(time_ms)
         bullets[#bullets + 1] = entity.new({"bullet"}, 0, plane.pos, {y = 64, x = 64}, {x_min = -1, x_max = 1, y_min = -1, y_max = 1})
         cooldown = 300
     end
-
-
-    progress = progress + 1
 
     local r = math.random(1, 100)
     if r > 95 then
@@ -173,8 +170,12 @@ function OnGameTick(time_ms)
 
         for k, bullet in pairs(bullets) do
             if bullet:is_collided(enemy) then
+                score = score + 1
+                print("Score: " .. score)
+                bullets[k] = nil
                 enemy:set_frame("crash")
                 enemy.timeout = 200
+                break
             end
         end
 
